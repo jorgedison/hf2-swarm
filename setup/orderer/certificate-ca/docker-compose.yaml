@@ -1,0 +1,43 @@
+# Copyright All Rights Reserved.
+# Autor: Jorge Rodriguez, jorgeedison1@gmail.com
+# Date: 25-09-2020
+# SPDX-License-Identifier: Apache-2.0
+
+version: "3.2"
+
+networks:
+  my-net:
+    external:
+      name: my-net
+
+services:
+  ca_orderer:
+    networks:
+      my-net:
+        aliases:
+          - ca_orderer
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+      placement:
+        constraints:
+          - node.hostname == jorgedison
+    image: hyperledger/fabric-ca
+    hostname: ca.orderer.midominio.com
+    environment:
+      - FABRIC_CA_CLIENT_HOME=/etc/hyperledger/fabric-ca-server-config
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=ca.orderer
+      - FABRIC_CA_SERVER_TLS_ENABLED=true
+      - FABRIC_CA_SERVER_PORT=9054
+    ports:
+      - published: 9054
+        target: 9054
+    command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
+    volumes:
+      - ../crypto-config/ordererOrganizations/midominio.com/:/etc/hyperledger/fabric-ca-server-config
+      - ./fabric-ca/ordererOrg:/etc/hyperledger/fabric-ca-server
+      - ./var/ca-orderer:/etc/hyperledger

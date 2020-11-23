@@ -1,0 +1,60 @@
+# Copyright All Rights Reserved.
+# Autor: Jorge Rodriguez, jorgeedison1@gmail.com
+# Date: 25-09-2020
+# SPDX-License-Identifier: Apache-2.0
+
+OrdererOrgs:
+  - Name: Orderer
+    Domain: midominio.com
+    EnableNodeOUs: true
+
+    Specs:
+      - Hostname: orderer
+        SANS:
+            - "localhost"
+            - "127.0.0.1"
+      - Hostname: orderer2
+        SANS:
+          - "localhost"
+          - "127.0.0.1"
+      - Hostname: orderer3
+        SANS:
+            - "localhost"
+            - "127.0.0.1"
+
+PeerOrgs:
+  - Name: Org1
+    Domain: org1.midominio.com
+    EnableNodeOUs: true
+
+    Template:
+      Count: 2
+      SANS:
+        - "localhost"
+
+    Users:
+      Count: 1
+
+  - Name: Org2
+    Domain: org2.midominio.com
+    EnableNodeOUs: true
+
+    Template:
+      Count: 2
+      SANS:
+        - "localhost"
+
+    Users:
+      Count: 1
+
+  - Name: Org3
+    Domain: org3.midominio.com
+    EnableNodeOUs: true
+
+    Template:
+      Count: 2
+      SANS:
+        - "localhost"
+
+    Users:
+      Count: 1

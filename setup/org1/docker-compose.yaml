@@ -1,0 +1,191 @@
+version: "3.2"
+
+networks:
+  my-net:
+    external:
+      name: my-net
+
+services:
+  couchdb0_org1:
+    image: hyperledger/fabric-couchdb
+    environment:
+      - COUCHDB_USER=
+      - COUCHDB_PASSWORD=
+    volumes:
+      - ./couchdb/couchdb0/:/opt/couchdb/data
+    ports:
+      - 5984:5984
+    networks:
+      my-net:
+        aliases:
+          - couchdb0.org1.midominio.com
+
+  couchdb1_org1:
+    image: hyperledger/fabric-couchdb
+    environment:
+      - COUCHDB_USER=
+      - COUCHDB_PASSWORD=
+    volumes:
+      - ./couchdb/couchdb1/:/opt/couchdb/data
+    ports:
+      - 6984:5984
+    networks:
+      my-net:
+        aliases:
+          - couchdb1.org1.midominio.com
+
+  peer0_org1:
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+      placement:
+         constraints:
+           - node.hostname == jorgedison
+    image: hyperledger/fabric-peer
+    hostname: peer0.org1.midominio.com
+    environment:
+      - FABRIC_LOGGING_SPEC=DEBUG
+      - ORDERER_GENERAL_LOGLEVEL=debug
+      - CORE_PEER_LOCALMSPID=Org1MSP
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=my-net
+      - CORE_PEER_ID=peer0.org1.midominio.com
+      - CORE_PEER_ADDRESS=peer0.org1.midominio.com:7051
+      - CORE_PEER_LISTENADDRESS=0.0.0.0:7051
+      - CORE_PEER_CHAINCODEADDRESS=peer0.org1.midominio.com:7052
+      - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:7052
+      # Exposed for discovery Service
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org1.midominio.com:7051
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0_org1:7051
+      - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb0_org1:5984
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME=
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD=
+      - CORE_METRICS_PROVIDER=prometheus
+      # - CORE_OPERATIONS_LISTENADDRESS=0.0.0.0:9440
+      - CORE_PEER_TLS_ENABLED=true
+      - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/crypto/peer/tls/server.crt
+      - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/crypto/peer/tls/server.key
+      - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/crypto/peer/tls/ca.crt
+      - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/crypto/peer/msp
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - CORE_LOGGING_LEVEL=INFO
+      - CORE_PEER_GOSSIP_USELEADERELECTION=true
+      - CORE_PEER_GOSSIP_ORGLEADER=false
+      - CORE_PEER_GOSSIP_SKIPHANDSHAKE=true
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+    command: peer node start
+    volumes:
+      - ./crypto-config/peerOrganizations/org1.midominio.com/peers/peer0.org1.midominio.com/msp:/etc/hyperledger/crypto/peer/msp
+      - ./crypto-config/peerOrganizations/org1.midominio.com/peers/peer0.org1.midominio.com/tls:/etc/hyperledger/crypto/peer/tls
+      - /var/run/:/host/var/run/
+      - ./:/etc/hyperledger/channel/
+      - ./var/peer0-org1:/var/hyperledger/production
+    ports:
+      - 7051:7051
+    networks:
+      my-net:
+        aliases:
+          - peer0.org1.midominio.com
+
+  peer1_org1:
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+      placement:
+         constraints:
+           - node.hostname == jorgedison
+    image: hyperledger/fabric-peer
+    hostname: peer1.org1.midominio.com
+    environment:
+      - FABRIC_LOGGING_SPEC=DEBUG
+      - ORDERER_GENERAL_LOGLEVEL=debug
+      - CORE_PEER_LOCALMSPID=Org1MSP
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=my-net
+      - CORE_PEER_ID=peer1.org1.midominio.com
+      - CORE_PEER_ADDRESS=peer1.org1.midominio.com:8051
+      - CORE_PEER_LISTENADDRESS=0.0.0.0:8051
+      - CORE_PEER_CHAINCODEADDRESS=peer1.org1.midominio.com:8052
+      - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:8052
+      # Exposed for discovery Service
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer1.org1.midominio.com:8051
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer1_org1:7051
+      - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb1_org1:5984
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME=
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD=
+      - CORE_METRICS_PROVIDER=prometheus
+      # - CORE_OPERATIONS_LISTENADDRESS=0.0.0.0:9440
+      - CORE_PEER_TLS_ENABLED=true
+      - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/crypto/peer/tls/server.crt
+      - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/crypto/peer/tls/server.key
+      - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/crypto/peer/tls/ca.crt
+      - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/crypto/peer/msp
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - CORE_LOGGING_LEVEL=INFO
+      - CORE_PEER_GOSSIP_USELEADERELECTION=true
+      - CORE_PEER_GOSSIP_ORGLEADER=false
+      - CORE_PEER_GOSSIP_SKIPHANDSHAKE=true
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+    command: peer node start
+    volumes:
+      - ./crypto-config/peerOrganizations/org1.midominio.com/peers/peer1.org1.midominio.com/msp:/etc/hyperledger/crypto/peer/msp
+      - ./crypto-config/peerOrganizations/org1.midominio.com/peers/peer1.org1.midominio.com/tls:/etc/hyperledger/crypto/peer/tls
+      - /var/run/:/host/var/run/
+      - ./:/etc/hyperledger/channel/
+      - ./var/peer1-org1:/var/hyperledger/production
+    ports:
+      - 8051:8051
+    networks:
+      my-net:
+        aliases:
+          - peer1.org1.midominio.com
+
+  cli:
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+      placement:
+         constraints:
+           - node.hostname == jorgedison
+    image: hyperledger/fabric-tools
+    hostname: cli
+    tty: true
+    environment:
+      - FABRIC_LOGGING_SPEC=DEBUG
+      - GOPATH=/opt/gopath
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - CORE_PEER_ID=cli
+      - CORE_PEER_ADDRESS=peer0.org1.midominio.com:7051
+      - CORE_PEER_LOCALMSPID=Org1MSP
+      # - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/channel/crypto-config/Org1MSP
+      - CORE_PEER_TLS_ENABLED=true
+      - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/channel/crypto-config/peerOrganizations/org1.midominio.com/peers/peer0.org1.midominio.com/tls/server.crt
+      - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/channel/crypto-config/peerOrganizations/org1.midominio.com/peers/peer0.org1.midominio.com/tls/server.key
+      - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/channel/crypto-config/peerOrganizations/org1.midominio.com/peers/peer0.org1.midominio.com/tls/ca.crt
+      - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/channel/crypto-config/peerOrganizations/org1.midominio.com/users/Admin@org1.midominio.com/msp
+      - ORDERER_CA=/etc/hyperledger/channel/crypto-config/ordererOrganizations/midominio.com/orderers/orderer.midominio.com/msp/tlscacerts/tlsca.midominio.com-cert.pem
+      - CORE_CHAINCODE_KEEPALIVE=10
+      - CHANNEL_NAME=mychannel
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+    command: /bin/bash
+    volumes:
+      - /var/run/:/host/var/run/
+      - ../../artifacts/channel/:/opt/gopath/src/github.com/hyperledger/fabric/peer/channel-artifacts/
+      - ./channel-artifacts/:/opt/gopath/src/github.com/hyperledger/fabric/peer/config/
+      - ./crypto-config/peerOrganizations/org1.midominio.com/:/etc/hyperledger/channel/crypto-config/peerOrganizations/org1.midominio.com/
+      - ./../org2/crypto-config/peerOrganizations/org2.midominio.com/:/etc/hyperledger/channel/crypto-config/peerOrganizations/org2.midominio.com/
+      - ./../org3/crypto-config/peerOrganizations/org3.midominio.com/:/etc/hyperledger/channel/crypto-config/peerOrganizations/org3.midominio.com/
+      - ./../orderer/crypto-config/ordererOrganizations/midominio.com/:/etc/hyperledger/channel/crypto-config/ordererOrganizations/midominio.com/
+    networks:
+      my-net:
+        aliases:
+          - cli

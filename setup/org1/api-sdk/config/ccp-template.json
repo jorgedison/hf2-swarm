@@ -1,0 +1,62 @@
+{
+    "name": "first-network-org${ORG}",
+    "version": "1.0.0",
+    "client": {
+        "organization": "Org${ORG}",
+        "connection": {
+            "timeout": {
+                "peer": {
+                    "endorser": "300"
+                }
+            }
+        }
+    },
+    "organizations": {
+        "Org${ORG}": {
+            "mspid": "Org${ORG}MSP",
+            "peers": [
+                "peer0.org${ORG}.midominio.com",
+                "peer1.org${ORG}.midominio.com"
+            ],
+            "certificateAuthorities": [
+                "ca.org${ORG}.midominio.com"
+            ]
+        }
+    },
+    "peers": {
+        "peer0.org${ORG}.midominio.com": {
+            "url": "grpcs://peer0.org1.midominio.com:${P0PORT}",
+            "tlsCACerts": {
+                "pem": "${PEERPEM}"
+            },
+            "grpcOptions": {
+                "ssl-target-name-override": "peer0.org${ORG}.midominio.com",
+                "hostnameOverride": "peer0.org${ORG}.midominio.com"
+            }
+        },
+	"peer1.org${ORG}.midominio.com": {
+            "url": "grpcs://peer1.org1.midominio.com:${P0PORT1}",
+            "tlsCACerts": {
+                "pem": "${PEERPEM1}"
+            },
+            "grpcOptions": {
+                "ssl-target-name-override": "peer1.org${ORG}.midominio.com",
+                "hostnameOverride": "peer1.org${ORG}.midominio.com"
+            }
+        }
+
+	
+    },
+    "certificateAuthorities": {
+        "ca.org${ORG}.midominio.com": {
+            "url": "https://ca.org1.midominio.com:${CAPORT}",
+            "caName": "ca.org${ORG}.midominio.com",
+            "tlsCACerts": {
+                "pem": "${CAPEM}"
+            },
+            "httpOptions": {
+                "verify": false
+            }
+        }
+    }
+}
