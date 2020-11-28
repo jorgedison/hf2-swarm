@@ -1,13 +1,18 @@
-version: "2.1"
+version: "3.2"
 
 networks:
   my-net:
+    external:
+      name: my-net
 
 services:
   api:
-    image: api:1.0
-    build: .
-    networks:
-      - my-net
+    image: api_fabric_sdk:1.0
     ports:
       - 4000:4000
+    extra_hosts:
+      - "ca.org1.midominio.com:10.200.1.51"
+    networks:
+      my-net:
+        aliases:
+          - api.fabric.sdk
