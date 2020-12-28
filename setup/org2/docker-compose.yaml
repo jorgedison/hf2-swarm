@@ -7,6 +7,15 @@ networks:
 
 services:
   couchdb0_org2:
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+      placement:
+         constraints:
+           - node.hostname == jorgedison
     image: hyperledger/fabric-couchdb
     environment:
       - COUCHDB_USER=
@@ -21,6 +30,15 @@ services:
           - couchdb0.org2.midominio.com
 
   couchdb1_org2:
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+      placement:
+         constraints:
+           - node.hostname == jorgedison
     image: hyperledger/fabric-couchdb
     environment:
       - COUCHDB_USER=
