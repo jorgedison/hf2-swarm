@@ -1,6 +1,6 @@
 ## Hyperledger Fabric v2.2.0
 #### Implementación de red blockchain utilizando Hyperledger Fabric 2.2.0
-##### Pre-Requisitos
+##### Pre-Requisitos 
 ```
 cd script
 ./pre-requisitos.sh
